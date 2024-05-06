@@ -6,8 +6,8 @@ const saveLogMongo = wrapper((req, res, next) => {
 
   res.on("finish", async () => {
     const log = {
-      accountIdx: req.session ? req.session.accountIdx : 0,
-      accountId: req.session ? req.session.accountId : "",
+      accountIdx: req.decoded?.accountIdx || 0,
+      accountId: req.decoded?.accountIdx || "",
       path: req.isError
         ? "error-handler" + req.baseUrl + req.path
         : req.baseUrl + req.path, // req.path

@@ -1,4 +1,5 @@
 const router = require("express").Router();
+const jwt = require("jsonwebtoken");
 const { pgPool } = require("../database/postgreSQL");
 const { checkEmail } = require("../middleware/checkEmail");
 const { checkId } = require("../middleware/checkId");
@@ -32,12 +33,20 @@ router.post(
       req.code = 200;
       throw new Exception(200, "서버: 아이디 또는 비밀번호 오류");
     }
-    req.session.accountIdx = user.idx;
-    req.session.role = user.role_idx;
-    req.session.accountId = user.id;
+    const token = jwt.sign(
+      {
+        accountIdx: user.idx, // account의 idx
+        role: user.role_idx, // account의 role
+      },
+      process.env.JWT_SECRET_KEY, // 여기가 암호화 키 넣는 부분 (난수문자열을 써야함) (절대로 남에게 공개되면 안됨)
+      {
+        issuer: "stageus-kimyoungsun",
+        expiresIn: "6h", // 이 토큰의 만료시간 (웬만하면 이 만료시간은 꼭 설정해주는게 좋다)
+      }
+    );
 
     req.code = 200;
-    req.result = result();
+    req.result = result({ token: token });
     res.status(200).send(req.result);
   })
 );
@@ -46,8 +55,6 @@ router.post(
 router.delete(
   "/logout",
   wrapper((req, res) => {
-    req.session.destroy(function (err) {});
-
     req.code = 200;
     req.result = result();
     res.status(200).send(req.result);
@@ -140,7 +147,8 @@ router.get(
   "/",
   checkIsLogin,
   wrapper(async (req, res) => {
-    const { accountIdx } = req.session;
+    //const { accountIdx } = req.session;
+    const { accountIdx } = req.decoded;
 
     const selectResult = await pgPool.query(
       "SELECT * FROM account.list WHERE idx = $1",
@@ -165,7 +173,7 @@ router.put(
   checkIsLogin,
   checkEmail,
   wrapper(async (req, res) => {
-    const { accountIdx } = req.session;
+    const { accountIdx } = req.decoded;
     const { name, nickname, email, password, passwordCheck } = req.body;
 
     if (password != passwordCheck) {
@@ -188,13 +196,9 @@ router.delete(
   "/",
   checkIsLogin,
   wrapper(async (req, res, next) => {
-    const { accountIdx } = req.session;
+    const { accountIdx } = req.decoded;
 
     await pgPool.query("DELETE FROM account.list WHERE idx = $1", [accountIdx]);
-
-    req.session.destroy(function (err) {
-      console.log("회원탈퇴 성공");
-    });
 
     req.code = 200;
     req.result = result();

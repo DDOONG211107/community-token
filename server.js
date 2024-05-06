@@ -7,19 +7,20 @@ require("dotenv").config();
 
 const express = require("express"); // express 패키지를 import
 const session = require("express-session");
+const jwt = require("jsonwebtoken");
 const app = express();
 const result = require("./src/module/result");
 const { Exception } = require("./src/module/Exception");
 
-app.use(
-  session({
-    secret: "3AF874B5C209D264", // *알아볼 수 없는 난수값으로 설정해야 한다 (16진수 난수로)
-    resave: false,
-    saveUninitialized: false,
+// app.use(
+//   session({
+//     secret: "3AF874B5C209D264", // *알아볼 수 없는 난수값으로 설정해야 한다 (16진수 난수로)
+//     resave: false,
+//     saveUninitialized: false,
 
-    cookie: { maxAge: 60 * 60 * 10 },
-  })
-);
+//     cookie: { maxAge: 60 * 60 * 10 },
+//   })
+// );
 app.use(express.json()); // object를 가지고 활용할 수 있게 해주는 코드
 
 // 중요한 토픽 : interceptor 라는 것은 res.send의 오버라이딩
@@ -74,7 +75,10 @@ app.use((err, req, res, next) => {
   console.log(err); // 에러만 로깅
   if (err.code == 23503) {
     req.code = 404;
-    req.result = result(null, "서버: 존재하지 않는 리소스에 접근 시도");
+    req.result = result(
+      null,
+      "서버: Foreign Key: 존재하지 않는 리소스에 접근 시도"
+    );
     return res.status(404).send(req.result);
   }
 

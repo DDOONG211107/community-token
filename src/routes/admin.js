@@ -16,10 +16,10 @@ router.get(
     let sort = 0;
 
     const startDate = new Date(
-      startDateString ? startDateString : "2024-01-01T00:00:00"
+      startDateString.length > 0 ? startDateString : "2024-01-01T00:00:00"
     );
     const endDate = new Date(
-      endDateString ? endDateString : "2099-12-31T00:00:00"
+      endDateString.length > 0 ? endDateString : "2099-12-31T00:00:00"
     );
 
     // 내림차순으로 정렬해야 함

@@ -3,7 +3,7 @@ const { Exception } = require("../module/Exception");
 const wrapper = require("../module/wrapper");
 
 const checkId = wrapper(async (req, res, next) => {
-  const { accountIdx } = req.session;
+  const accountIdx = req.decoded?.accountIdx || 0;
   const { id } = req.body;
 
   const selectResult = await pgPool.query(

@@ -31,7 +31,7 @@ router.get(
 router.get(
   "/:free_idx",
   wrapper(async (req, res, next) => {
-    const { accountIdx } = req.session;
+    const accountIdx = req.decoded?.accountIdx || 0;
     const { free_idx } = req.params;
 
     if (!free_idx) {
@@ -70,7 +70,7 @@ router.post(
   [Title, Post_content, validate],
   checkIsLogin,
   wrapper(async (req, res) => {
-    const { accountIdx } = req.session;
+    const { accountIdx } = req.decoded;
     const { title, content } = req.body;
 
     await pgPool.query(
@@ -93,7 +93,7 @@ router.put(
   [Title, Post_content, validate],
   wrapper(async (req, res, next) => {
     const { free_idx } = req.params;
-    const { accountIdx } = req.session;
+    const accountIdx = req.decoded?.accountIdx || 0;
     const { title, content } = req.body; // postWriterIdx를 프론트에서 받아오면 안된다
 
     if (!free_idx) {
@@ -120,7 +120,7 @@ router.delete(
   "/:free_idx",
   wrapper(async (req, res, next) => {
     const { free_idx } = req.params;
-    const { accountIdx } = req.session;
+    const { accountIdx } = req.decoded;
 
     if (!free_idx) {
       req.code = 404;

@@ -24,7 +24,7 @@ const validate = (req, res, next) => {
       data: null,
     };
     const log = {
-      accountIdx: req.session.accountIdx ? req.session.accountIdx : undefined,
+      accountIdx: req.decoded?.accountIdx || 0,
       name: "middleware/validate",
       rest: undefined,
       createdAt: new Date(),
